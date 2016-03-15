@@ -1,34 +1,36 @@
-﻿Build started 13/03/2016 20:39:01.
+﻿Build started 15/03/2016 20:03:32.
      1>Project "C:\Users\Claire\Documents\TCD\MAI\Dissertation\DailyProphet\DailyProphet\DailyProphet.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt findMarks.cpp main.cpp
-         main.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt findMarks.cpp
+     1>cl : Command line warning D9028: minimal rebuild failure, reverting to normal build
          findMarks.cpp
-     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(47): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(51): warning C4244: 'argument' : conversion from 'double' to 'int', possible loss of data
-     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(55): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(77): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(95): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(101): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(115): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(126): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(132): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(162): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(169): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(177): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(183): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(192): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(197): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(254): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(270): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(346): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(371): warning C4244: 'return' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(379): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(464): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(484): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(495): warning C4018: '<' : signed/unsigned mismatch
-         Generating Code...
-     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(373): warning C4715: 'calibrateColours' : not all control paths return a value
+     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(50): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(54): warning C4244: 'argument' : conversion from 'double' to 'int', possible loss of data
+     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(59): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(81): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(99): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(105): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(119): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(130): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(136): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(166): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(173): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(181): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(187): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(196): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(201): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(258): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(274): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(350): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(375): warning C4244: 'return' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(390): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(471): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(493): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(504): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(579): warning C4244: 'argument' : conversion from 'int' to 'float', possible loss of data
+     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(580): warning C4244: 'argument' : conversion from 'int' to 'float', possible loss of data
+     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(581): warning C4244: 'argument' : conversion from 'int' to 'float', possible loss of data
+     1>c:\users\claire\documents\tcd\mai\dissertation\dailyprophet\dailyprophet\findmarks.cpp(377): warning C4715: 'calibrateColours' : not all control paths return a value
        Link:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Claire\Documents\TCD\MAI\Dissertation\DailyProphet\Debug\DailyProphet.exe" /INCREMENTAL /NOLOGO opencv_ts300d.lib opencv_world300d.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Claire\Documents\TCD\MAI\Dissertation\DailyProphet\Debug\DailyProphet.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Claire\Documents\TCD\MAI\Dissertation\DailyProphet\Debug\DailyProphet.lib" /MACHINE:X86 Debug\findMarks.obj
          Debug\main.obj
@@ -38,4 +40,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:02.96
+Time Elapsed 00:00:02.17

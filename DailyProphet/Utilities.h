@@ -12,7 +12,7 @@ using namespace cv;
 
 void findMarks(Mat &input, Mat &output);
 void calibrateProjection(Mat &input);
-void test(Mat &input, Mat &output);
+void transform(Mat &output);
 void populatedCalibPt();
 float calibrateColours(Mat &input, int code);
 void populateColourPts(int code, float min, float max);

@@ -6,6 +6,7 @@
 #include <iostream>
 #include <vector>
 
+#define NUM_MARKS 4
 
 using namespace cv;
 using namespace std;
@@ -23,10 +24,11 @@ int main(int argc, const char** argv)
 	Mat sciGal = imread("Media/ScienceGalleryNewsLight.png");
 	Mat calibrationImage = imread("Media/calibrationImage.png");
 	Mat black = imread("Media/black.png");
+	Mat samples = imread("Media/samples_new.png");
 	
 
 
-	/*
+	
 	Mat webcam[7];
 
 	webcam[0] = imread("Media/webcam.jpg");
@@ -37,6 +39,10 @@ int main(int argc, const char** argv)
 	webcam[5] = imread("Media/webcam5.jpg");
 	webcam[6] = imread("Media/webcam6.jpg");
 
+
+
+
+	/*
 	//findMarks(sciGal);
 	for (int i = 0; i < 7; i++)
 	{
@@ -106,9 +112,9 @@ int main(int argc, const char** argv)
 	if (!capOutput.isOpened())
 		return -1;
 
-	namedWindow("Calibration Image", WINDOW_NORMAL);
-	setWindowProperty("Calibration Image", WND_PROP_FULLSCREEN, WINDOW_FULLSCREEN);
-	imshow("Calibration Image", calibrationImage);
+	//namedWindow("Calibration Image", WINDOW_NORMAL);
+	//setWindowProperty("Calibration Image", WND_PROP_FULLSCREEN, WINDOW_FULLSCREEN);
+	//imshow("Calibration Image", calibrationImage);
 	
 
 	bool cameraCalibrated = false, colourCalibrated = false;
@@ -121,6 +127,7 @@ int main(int argc, const char** argv)
 
 	// physically align camera and projector
 	
+
 	for (;;)
 	{
 		capInput >> input;
@@ -145,22 +152,22 @@ int main(int argc, const char** argv)
 		capOutput >> output;
 
 		//imshow("original", input);
-		//test(input, input);
-
+		//test(input, output);
+		//findMarks(input, output);
 		
 		//----------- Projection Calibration -----------------
 		//while (!cameraCalibrated && count > 10)
 		if (!cameraCalibrated && count > 1)
 		{
 			calibrateProjection(input);
-			/*
-			cout << "\nWere the marks correct?: ";
-			string answer;
-			cin >> answer;
-			if (answer == "y")*/
+			
+			//cout << "\nWere the marks correct?: ";
+			//string answer;
+			//cin >> answer;
+			//if (answer == "y")
 				cameraCalibrated = true;
 		}
-
+		
 		//if (count > 1)
 			//cameraCalibrated = true;
 
@@ -171,8 +178,9 @@ int main(int argc, const char** argv)
 			setWindowProperty("Black", WND_PROP_FULLSCREEN, WINDOW_FULLSCREEN);
 			imshow("Black", black);
 			
-			cout << "\nColour Codes:\n0 - Red\n1 - Gold\n2 - Teal\n3 - Purple\n4 - Orange\n5 - Green\n6 - Blue\n7 - Pink\n\n";
-			for (int j = 0; j < 8; j++)
+			cout << "\nColour Codes:\n0 - Pink\n1 - Blue\n2 - Green\n3 - Gold\n\n";
+				//"4 - Purple\n5 - Teal\n6 - Green/Yellow\n7 - Red\n\n";
+			for (int j = 0; j < NUM_MARKS; j++)
 			{
 				imshow("Input", input);
 				cout << "\nCalibrate " << j << endl;
@@ -193,18 +201,22 @@ int main(int argc, const char** argv)
 				avgHue = avgHue / total;
 				cout << "avgHue: " << avgHue << endl;
 
-				populateColourPts(j, avgHue - 5, avgHue + 5);
+				populateColourPts(j, avgHue - 13, avgHue + 13);
 
 				total = iterations;
 				avgHue = 0;
 			}
+			cout << "Calibration Complete.\n\nSet up for detection...\n\n";
+			waitKey(0);
+			capInput >> input >> input;
 			colourCalibrated = true;
+			//capInput >> input;
 		}
-
+		
 		if (cameraCalibrated && colourCalibrated)
 		{
 			//test(input, output);
-			//findMarks(input, output);
+			findMarks(input, output);
 			imshow("Input", input);
 		}
 		
