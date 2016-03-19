@@ -6,7 +6,7 @@
 #include <iostream>
 #include <vector>
 
-#define NUM_MARKS 4
+#define NUM_MARKS 1
 
 using namespace cv;
 using namespace std;
@@ -22,7 +22,7 @@ int main(int argc, const char** argv)
 	Mat dotSample = imread("Media/dotSample.png");
 	Mat cameraPic = imread("Media/cameraPic.jpg");
 	Mat sciGal = imread("Media/ScienceGalleryNewsLight.png");
-	Mat calibrationImage = imread("Media/calibrationImage.png");
+	Mat calibrationImage = imread("Media/calibrationImage3.png");
 	Mat black = imread("Media/black.png");
 	Mat samples = imread("Media/samples_new.png");
 	
@@ -112,12 +112,12 @@ int main(int argc, const char** argv)
 	if (!capOutput.isOpened())
 		return -1;
 
-	//namedWindow("Calibration Image", WINDOW_NORMAL);
-	//setWindowProperty("Calibration Image", WND_PROP_FULLSCREEN, WINDOW_FULLSCREEN);
-	//imshow("Calibration Image", calibrationImage);
+	namedWindow("Calibration Image", WINDOW_NORMAL);
+	setWindowProperty("Calibration Image", WND_PROP_FULLSCREEN, WINDOW_FULLSCREEN);
+	imshow("Calibration Image", calibrationImage);
 	
 
-	bool cameraCalibrated = false, colourCalibrated = false;
+	bool cameraCalibrated = false, colourCalibrated = false, setUp = false;
 	string answer = "";
 	Mat input, output, gray, binary;
 	float avgHue = 0;
@@ -127,14 +127,16 @@ int main(int argc, const char** argv)
 
 	// physically align camera and projector
 	
-
+	cout << "Align camera and projector...\n";
 	for (;;)
 	{
 		capInput >> input;
+		capOutput >> output;
 
 		cvtColor(input, gray, COLOR_BGR2GRAY);
 		threshold(gray, binary, 0, 255, THRESH_OTSU);
 
+		//imshow("Test Output", output);
 		imshow("Input", input);
 		imshow("Binary", binary);
 
@@ -150,35 +152,51 @@ int main(int argc, const char** argv)
 	{
 		capInput >> input; 
 		capOutput >> output;
-
-		//imshow("original", input);
-		//test(input, output);
-		//findMarks(input, output);
 		
 		//----------- Projection Calibration -----------------
-		//while (!cameraCalibrated && count > 10)
 		if (!cameraCalibrated && count > 1)
 		{
+			cout << "Calibrate projector and camera...\n";
 			calibrateProjection(input);
-			
-			//cout << "\nWere the marks correct?: ";
-			//string answer;
-			//cin >> answer;
-			//if (answer == "y")
-				cameraCalibrated = true;
+
+			/*
+			cout << "\nWere the marks correct?: ";
+			cin >> answer;
+			if (answer != "y")
+				setUp = true;
+			*/
+			cameraCalibrated = true;
+		}
+
+		while (setUp)
+		{
+			capInput >> input;
+
+			cvtColor(input, gray, COLOR_BGR2GRAY);
+			threshold(gray, binary, 0, 255, THRESH_OTSU);
+
+			imshow("Input", input);
+			imshow("Binary", binary);
+
+			if (waitKey(30) >= 0)
+			{
+				cameraCalibrated = false;
+				setUp = false;
+			}
 		}
 		
 		//if (count > 1)
 			//cameraCalibrated = true;
 
 		// ----------- Colour Calibration ----------------------
-		if (cameraCalibrated && !colourCalibrated)
+		if (cameraCalibrated && !colourCalibrated && !setUp)
 		{
 			namedWindow("Black", WINDOW_NORMAL);
 			setWindowProperty("Black", WND_PROP_FULLSCREEN, WINDOW_FULLSCREEN);
 			imshow("Black", black);
 			
-			cout << "\nColour Codes:\n0 - Pink\n1 - Blue\n2 - Green\n3 - Gold\n\n";
+			
+		/*	cout << "\nColour Codes:\n0 - Pink\n1 - Blue\n2 - Green\n3 - Gold\n\n";
 				//"4 - Purple\n5 - Teal\n6 - Green/Yellow\n7 - Red\n\n";
 			for (int j = 0; j < NUM_MARKS; j++)
 			{
@@ -192,7 +210,7 @@ int main(int argc, const char** argv)
 					capInput >> input;
 					imshow("Input", input);
 					float temp = calibrateColours(input, j);
-					//cout << "temp " << temp << endl;
+					cout << "temp " << temp << endl;
 					if (temp > 0)
 						avgHue += temp;
 					else
@@ -205,23 +223,34 @@ int main(int argc, const char** argv)
 
 				total = iterations;
 				avgHue = 0;
-			}
-			cout << "Calibration Complete.\n\nSet up for detection...\n\n";
-			waitKey(0);
-			capInput >> input >> input;
-			colourCalibrated = true;
-			//capInput >> input;
+			}*/
+			//cout << "\nContinue?: ";
+			//cin >> answer;
+			//if (answer == "y")
+			//{
+				colourCalibrated = true;
+				cout << "Calibration Complete.\n\nSet up for detection...\n\n";
+				waitKey(0);
+				capInput >> input >> input;
+			//}
 		}
 		
 		if (cameraCalibrated && colourCalibrated)
 		{
 			//test(input, output);
 			findMarks(input, output);
+			//findAlignmentMarks(input, output);
 			imshow("Input", input);
 		}
-		
-
-		if (waitKey(30) >= 0) break;
+		int k = waitKey(30);
+		if (k == 32)
+		{
+			namedWindow("Black", WINDOW_NORMAL);
+			setWindowProperty("Black", WND_PROP_FULLSCREEN, WINDOW_FULLSCREEN);
+			imshow("Black", black);
+		}
+		else if (k == 27) break;
+		//if (waitKey(30) >= 0) break;
 		count++;
 	}
 	

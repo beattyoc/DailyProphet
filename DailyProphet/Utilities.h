@@ -11,6 +11,8 @@ using namespace std;
 using namespace cv;
 
 void findMarks(Mat &input, Mat &output);
+void findColourMarks(Mat &input, Mat &output);
+void findAlignmentMarks(Mat &input, Mat &output);
 void calibrateProjection(Mat &input);
 void transform(Mat &output);
 void populatedCalibPt();

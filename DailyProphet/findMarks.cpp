@@ -14,6 +14,7 @@ using namespace std;
 
 Point2f gold(0, 0), pink(0, 0), blue(0, 0), green(0, 0), yg(0, 0), purple(0, 0), red(0, 0), teal(0, 0);
 Point2f TL(0, 0), TR(0, 0), BL(0, 0), BR(0, 0);
+Point2f topLeft(0, 0), topRight(0, 0), bottomRight(0, 0), bottomLeft(0, 0);
 
 bool identified[NUM_MARKS];
 
@@ -29,11 +30,14 @@ float goldMin = 0, goldMax = 0,
 // hard coded values for testing when a projector is not available
 void populatedCalibPt()
 {
-	TL = Point2f(20, 20);
+	/*TL = Point2f(20, 20);
 	TR = Point2f(360, 20);
 	BR = Point2f(360, 290);
-	BL = Point2f(20, 290);
-	
+	BL = Point2f(20, 290);*/
+	TL = Point2f(36, 37);
+	TR = Point2f(602, 37);
+	BR = Point2f(602, 442);
+	BL = Point2f(36, 442);
 }
 
 // ---------------- functions for locating markers -------------------------------
@@ -154,12 +158,11 @@ void eliminatePairs(vector<vector<CONT > >& vecpair, double minRatio, double max
 void populateCalibrationPts(vector<Point2f> &center, Mat &input)
 {
 	vector<bool> isIdentified(center.size(), false);
-	Point2f topLeft, topRight, bottomLeft, bottomRight;
+	Point2f _topLeft, _topRight, _bottomLeft, _bottomRight;
 	float topLeftSum, bottomRightSum;
 	int topLeftPos = 0;
 
-	topLeft.x = bottomRight.x = center[0].x;
-	topLeft.y = bottomRight.y = center[0].y;
+	_topLeft = _bottomRight = center[0];
 	topLeftSum = bottomRightSum = center[0].x + center[0].y;
 	isIdentified[0] = true;
 
@@ -168,7 +171,7 @@ void populateCalibrationPts(vector<Point2f> &center, Mat &input)
 		if ((center[i].x + center[i].y) < topLeftSum)
 		{
 			topLeftSum = center[i].x + center[i].y;
-			topLeft = center[i];
+			_topLeft = center[i];
 			topLeftPos = i;
 			for (int j = 0; j < center.size(); j++)
 			{
@@ -183,7 +186,7 @@ void populateCalibrationPts(vector<Point2f> &center, Mat &input)
 		if ((center[i].x + center[i].y) > bottomRightSum)
 		{
 			bottomRightSum = center[i].x + center[i].y;
-			bottomRight = center[i];
+			_bottomRight = center[i];
 			for (int j = 0; j < center.size(); j++)
 			{
 				if ((j != i) && (j != topLeftPos))
@@ -197,48 +200,48 @@ void populateCalibrationPts(vector<Point2f> &center, Mat &input)
 	{
 		if (!isIdentified[i])
 		{
-			bottomLeft = center[i];
+			_bottomLeft = center[i];
 			for (int j = 0; j < center.size(); j++)
 			{
 				if ((!isIdentified[j]) && (i != j))
 				{
-					topRight = center[j];
-					if (topRight.x < bottomLeft.x)
+					_topRight = center[j];
+					if (_topRight.x < _bottomLeft.x)
 					{
-						bottomLeft = center[j];
-						topRight = center[i];
+						_bottomLeft = center[j];
+						_topRight = center[i];
 					}
 				}
 			}	
 		}
 	}
 
-	TL = topLeft;
-	TR = topRight;
-	BR = bottomRight;
-	BL = bottomLeft;
+	TL = _topLeft;
+	TR = _topRight;
+	BR = _bottomRight;
+	BL = _bottomLeft;
 	
 	Scalar color = Scalar(0, 255, 255);
 	Mat calibration = input.clone();
 
 	/*
-	cout << "Top Left: (" << topLeft.x << "," << topLeft.y << ")\n";
-	circle(calibration, topLeft, 20, color, 2, 8, 0);
+	cout << "\nTop Left: " << TL << endl;
+	circle(calibration, TL, 20, color, 2, 8, 0);
 	imshow("Calibration", calibration);
 	waitKey(0);
 
-	cout << "Bottom Right: (" << bottomRight.x << "," << bottomRight.y << ")\n";
-	circle(calibration, bottomRight, 20, color, 2, 8, 0);
+	cout << "Bottom Right: " << BR << endl;
+	circle(calibration, BR, 20, color, 2, 8, 0);
 	imshow("Calibration", calibration);
 	waitKey(0);
 
-	cout << "Top Right: (" << topRight.x << "," << topRight.y << ")\n";
-	circle(calibration, topRight, 20, color, 2, 8, 0);
+	cout << "Top Right: " << TR << endl;
+	circle(calibration, TR, 20, color, 2, 8, 0);
 	imshow("Calibration", calibration);
 	waitKey(0);
 
-	cout << "Bottom Left: (" << bottomLeft.x << "," << bottomLeft.y << ")\n";
-	circle(calibration, bottomLeft, 20, color, 2, 8, 0);
+	cout << "Bottom Left: " << BL << endl;
+	circle(calibration, BL, 20, color, 2, 8, 0);
 	
 	imshow("Calibration", calibration);
 	waitKey(0);
@@ -252,6 +255,7 @@ void calibrateProjection(Mat &input)
 	threshold(gray, binary, 0, 255, THRESH_OTSU);
 	imshow("Binary", binary);
 
+
 	//-------------- find patternss ----------------
 	vector<CONT > contours;
 	vector<Vec4i> hierarchy;
@@ -261,12 +265,11 @@ void calibrateProjection(Mat &input)
 	eliminatePairs(vecpair, 1.0, 10.0);
 	
 	//---- if a pattern is found -----------
-	cout << "Marks Found: " << vecpair.size() << endl;
+	cout << "Calibration Marks Found: " << vecpair.size() << endl;
 	if (vecpair.size() == 4)
 	{
 		/// Approximate contours to polygons + get bounding rects and circles
 		vector<vector<Point> > contours_poly(vecpair.size());
-		//vector<Rect> boundRect(vecpair.size());
 		vector<Point2f> center(vecpair.size());
 		vector<float> radius(vecpair.size());
 
@@ -342,7 +345,7 @@ float calibrateColours(Mat &input, int code)
 	Mat gray, binary;
 	cvtColor(input, gray, COLOR_BGR2GRAY);
 	threshold(gray, binary, 0, 255, THRESH_OTSU);
-	//imshow("Binary", binary);
+	imshow("Binary", binary);
 
 	//-------------- find patternss ----------------
 	vector<CONT > contours;
@@ -454,7 +457,8 @@ void drawCircles(Mat &input)
 
 // ------------------------- main function ---------------------------------
 
-void findMarks(Mat &input, Mat &output)
+// ---------- Colour Method ---------------------
+void findColourMarks(Mat &input, Mat &output)
 {
 	//-------------- get binary image -------------
 	Mat gray, binary, hls, hsv;
@@ -547,10 +551,399 @@ void findMarks(Mat &input, Mat &output)
 	}
 }
 
-Mat getOuterToInner()
+
+// ----------- Brute Force Method ---------------
+
+bool populateMarks(vector<Point2f> &center)
+{
+	vector<bool> isIdentified(center.size(), false);
+	Point2f _topLeft, _topRight, _bottomLeft, _bottomRight;
+	float topLeftSum, bottomRightSum;
+	int topLeftPos = 0;
+
+	_topLeft = _bottomRight = center[0];
+	topLeftSum = bottomRightSum = center[0].x + center[0].y;
+	isIdentified[0] = true;
+
+	for (int i = 1; i < center.size(); i++)
+	{
+		if ((center[i].x + center[i].y) < topLeftSum)
+		{
+			topLeftSum = center[i].x + center[i].y;
+			_topLeft = center[i];
+			topLeftPos = i;
+			for (int j = 0; j < center.size(); j++)
+			{
+				if (j != i)
+					isIdentified[j] = false;
+				else isIdentified[j] = true;
+			}
+		}
+	}
+	for (int i = 1; i < center.size(); i++)
+	{
+		if ((center[i].x + center[i].y) > bottomRightSum)
+		{
+			bottomRightSum = center[i].x + center[i].y;
+			_bottomRight = center[i];
+			for (int j = 0; j < center.size(); j++)
+			{
+				if ((j != i) && (j != topLeftPos))
+					isIdentified[j] = false;
+				else isIdentified[j] = true;
+			}
+		}
+	}
+
+	for (int i = 0; i < center.size(); i++)
+	{
+		if (!isIdentified[i])
+		{
+			_bottomLeft = center[i];
+			for (int j = 0; j < center.size(); j++)
+			{
+				if ((!isIdentified[j]) && (i != j))
+				{
+					_topRight = center[j];
+					if (_topRight.x < _bottomLeft.x)
+					{
+						_bottomLeft = center[j];
+						_topRight = center[i];
+					}
+				}
+			}
+		}
+	}
+
+	topLeft = _topLeft;
+	topRight = _topRight;
+	bottomRight = _bottomRight;
+	bottomLeft = _bottomLeft;
+
+	return true;
+}
+
+void findMarks(Mat &input, Mat &output)
+{
+	//-------------- get binary image -------------
+	Mat gray, binary;
+	cvtColor(input, gray, COLOR_BGR2GRAY);
+	threshold(gray, binary, 0, 255, THRESH_OTSU);
+	imshow("Binary", binary);
+
+
+	//-------------- find patternss ----------------
+	vector<CONT > contours;
+	vector<Vec4i> hierarchy;
+	contours = findLimitedConturs(binary, 8.00, 0.2 * input.cols * input.rows);
+
+	if (!contours.empty()) sort(contours.begin(), contours.end(), compareContourAreas); // areas sorted from smallest to largest
+	vector<vector<CONT > > vecpair = getContourPair(contours);
+	eliminatePairs(vecpair, 1.0, 10.0);
+
+	for (int i = 0; i < NUM_MARKS; i++)
+		identified[i] = false;
+
+	cout << "Marks Found: " << vecpair.size() << endl;
+
+	//---- if a pattern is found -----------
+	if (vecpair.size() == 4)
+	{
+		/// Approximate contours to polygons + get bounding rects and circles
+		vector<CONT > contours_poly(vecpair.size());
+		vector<Rect> boundRect(vecpair.size());
+		vector<Point2f> center(vecpair.size());
+		vector<float> radius(vecpair.size());
+
+		// isolating the colour on the inner circle
+		for (int i = 0; i < vecpair.size(); i++)
+		{
+			approxPolyDP(Mat(vecpair.at(i).at(2)), contours_poly[i], 3, true);
+			boundRect[i] = boundingRect(Mat(contours_poly[i]));
+			minEnclosingCircle((Mat)contours_poly[i], center[i], radius[i]);
+		}
+
+		/// Draw polygonal contour + bonding rects + circles
+
+		// for each found mark
+		for (int i = 0; i < vecpair.size(); i++)
+		{
+			Rect ROI(boundRect[i].tl(), boundRect[i].br());
+			Mat crop = input(ROI);
+			Scalar color = mean(crop);
+
+			circle(input, center[i], 20, color, 2, 8, 0);
+		}
+		cout << endl << endl;
+		imshow("Input", input);
+		if(populateMarks(center))
+			transform(output);
+	}
+}
+
+
+// ----------- Alignment / Colour Method -----------------
+
+float getDistance(Point2f a, Point2f b)
+{
+	return sqrtf(pow((b.x - a.x), 2) + pow((b.y - a.y), 2));
+	//return sqrt(((b.x - a.x)*(b.x - a.x)) + ((b.y - a.y)*(b.y - a.y)));
+}
+
+bool populateAlignmentMarks(vector<Point2f> &center, vector<Scalar> &hue, Mat& input)
+{
+	float currHue = 0;
+	bool foundColour = false;
+	vector<bool> isColour(center.size(), false);
+	vector<bool> isTL(center.size(), false);
+	vector<bool> isDiagonal(center.size(), false);
+	float currDist, maxDist = 0;
+	bool upsideDown = false;
+	Point2f p1, p2;
+
+	for (int i = 0; i < center.size(); i++)
+	{
+		currHue = hue[i][0];
+		//cout << "Current Hue: " << currHue << endl;
+		if ((currHue >= pinkMin) && (currHue <= pinkMax))
+		{
+			
+			bottomRight = center[i];
+			isColour[i] = true;
+			foundColour = true;
+		}
+	}
+
+	if (!foundColour)
+		return false;
+
+	// get Diagonal Pair
+	for (int i = 0; i < center.size() - 1; i++)
+	{
+		//cout << "i: " << i;
+		if (isColour[i]) continue;
+		
+		for (int j = 1; j < center.size(); j++)
+		{
+			//cout << "  j: " << j << endl;
+			if (isColour[j]) continue;
+			
+			currDist = getDistance(center[i], center[j]);
+
+			if (currDist >= maxDist)
+			{
+				maxDist = currDist;
+				p1 = center[i];
+				p2 = center[j];
+				for (int k = 0; k < center.size(); k++)
+				{
+					isDiagonal[k] = false;
+				}
+				isDiagonal[i] = true;
+				isDiagonal[j] = true;
+			}
+			
+		}
+	}
+
+
+	//get top left
+	for (int i = 0; i < center.size(); i++)
+	{
+		if (!isColour[i] && !isDiagonal[i])
+			topLeft = center[i];
+	}
+
+	
+	// sort Diagonal Pair
+	
+	float newy = (p2.y - p1.y) / (p2.x - p1.x) * topLeft.x + p1.y - (p2.y - p1.y) / (p2.x - p1.x) * p1.x;
+	//std::cout << "newy: " << newy << endl;
+	if (p1.x == p2.x)
+		return false;
+
+	if (p1.x > p2.x){
+		if (newy < topLeft.y){
+			topRight = p2;
+			bottomLeft = p1;
+		}
+		else{
+			//std::cout << "two\n";
+			bottomLeft = p1;
+			topRight = p2;
+		}
+	}
+	else{
+		if (newy < topLeft.y){
+			topRight = p1;
+			bottomLeft = p2;
+		}
+		else{
+			topRight = p2;
+			bottomLeft = p1;
+		}
+	}
+
+
+
+	// translate BL to origin
+	//float xTrans = BL.x, yTrans = BL.y;
+	/*
+	Point2f translation = bottomLeft * -1, tempBL = bottomLeft, tempTR = topRight, tempBR = bottomRight;
+
+	tempBL += translation;
+	// translate TR and BR the same
+	tempTR += translation;
+	tempBR += translation;
+
+	circle(input, tempBR, 20, (255, 255, 255), 2, 8, 0);
+	circle(input, tempBL, 20, (255, 255, 255), 2, 8, 0);
+	circle(input, tempTR, 20, (255, 255, 255), 2, 8, 0);
+	*/
+	/*
+	// translate TR to (0, maxDist)
+	translation.x = -tempTR.x;
+	//cout << "tempTR.y " << tempTR.y << endl;
+	if (tempTR.y > 0)
+		translation.y = maxDist - tempTR.y;
+	else
+		translation.y = maxDist + -tempTR.y;
+
+	tempTR += translation;
+
+	// translate BR the same
+	tempBR += translation;
+
+	// if BR.x is pos then leave marks as is else switch
+
+	cout << "tempBR: " << tempBR << endl;
+	cout << "tempBL: " << tempBL << endl;
+	cout << "tempTR: " << tempTR << endl;
+
+	circle(input, tempBR, 20, (255,255,255), 2, 8, 0);
+	circle(input, tempBL, 20, (255, 255, 255), 2, 8, 0);
+	circle(input, tempTR, 20, (255, 255, 255), 2, 8, 0);
+
+	if (tempBR.x < 0)
+	{
+		Point2f temp = bottomLeft;
+		bottomLeft = topRight;
+		topRight = temp;
+	}*/
+
+	//if ((tempBR.y < 0) && (tempBR.x > 0))
+		//return true;
+
+
+
+	return true;
+}
+
+void findAlignmentMarks(Mat &input, Mat &output)
+{
+	//-------------- get binary image -------------
+	Mat gray, binary, hls, hsv;
+	vector<Mat> channels;
+	cvtColor(input, gray, COLOR_BGR2GRAY);
+	threshold(gray, binary, 0, 255, THRESH_OTSU);
+	imshow("Input", input);
+	imshow("Binary", binary);
+
+
+	//-------------- find patternss ----------------
+	vector<CONT > contours;
+	vector<Vec4i> hierarchy;
+	contours = findLimitedConturs(binary, 8.00, 0.2 * input.cols * input.rows);
+	if (!contours.empty()) sort(contours.begin(), contours.end(), compareContourAreas); // areas sorted from smallest to largest
+	vector<vector<CONT > > vecpair = getContourPair(contours);
+	eliminatePairs(vecpair, 1.0, 10.0);
+
+	for (int i = 0; i < NUM_MARKS; i++)
+		identified[i] = false;
+
+
+	//---- if a pattern is found -----------
+	if (vecpair.size() == 4)
+	{
+		cvtColor(input, hls, COLOR_BGR2HLS);
+		split(hls, channels);
+
+		/// Approximate contours to polygons + get bounding rects and circles
+		vector<CONT > contours_poly(vecpair.size());
+		vector<Rect> boundRect(vecpair.size());
+		vector<Point2f> center(vecpair.size());
+		vector<float> radius(vecpair.size());
+		vector<Scalar> hue(vecpair.size());
+
+		// isolating the colour on the inner circle
+		for (int i = 0; i < vecpair.size(); i++)
+		{
+			approxPolyDP(Mat(vecpair.at(i).at(2)), contours_poly[i], 3, true);
+			boundRect[i] = boundingRect(Mat(contours_poly[i]));
+			minEnclosingCircle((Mat)contours_poly[i], center[i], radius[i]);
+		}
+
+		/// Draw polygonal contour + bonding rects + circles
+		cout << "Marks Found: " << vecpair.size() << endl;
+
+		// for each found mark
+		for (int i = 0; i < vecpair.size(); i++)
+		{
+			Rect ROI(boundRect[i].tl(), boundRect[i].br());
+
+			Mat cropHue = channels[0](ROI);
+			Mat crop = input(ROI);
+
+			Scalar color = mean(crop);
+			Scalar meanHue = mean(cropHue);
+			hue[i] = meanHue;
+
+			circle(input, center[i], 20, color, 2, 8, 0);
+		}
+		cout << endl << endl;
+
+		if (populateAlignmentMarks(center, hue, input))
+		{
+			/*
+			for (int i = 0; i < 4; i++)
+			{
+				if (i == 0) //top left
+				{
+					cout << "Top left\n";
+					circle(input, topLeft, 20, (255, 0, 128), 2, 8, 0);
+					imshow("Input", input);
+				}
+				else if (i == 1) 
+				{
+					cout << "Top right\n";
+					circle(input, topRight, 20, (255, 0, 128), 2, 8, 0);
+					imshow("Input", input);
+				}
+				else if (i == 2) 
+				{
+					cout << "Bottom right\n";
+					circle(input, bottomRight, 20, (255, 0, 128), 2, 8, 0);
+					imshow("Input", input);
+				}
+				else if (i == 3)
+				{
+					cout << "bottom left\n";
+					circle(input, bottomLeft, 20, (255, 0, 128), 2, 8, 0);
+					imshow("Input", input);
+				}
+				waitKey(0);
+			}*/
+
+			transform(output);
+		}
+	}
+}
+
+Mat getOuterToInner(Mat &output)
 {
 	vector<Point2f> outerNewsVec, innerNewsVec;
 
+	/*
 	outerNewsVec.push_back(Point2f(52, 55)); // Top Left
 	outerNewsVec.push_back(Point2f(590, 55)); // Top Right
 	outerNewsVec.push_back(Point2f(590, 427)); // Bottom Right
@@ -560,14 +953,55 @@ Mat getOuterToInner()
 	innerNewsVec.push_back(Point2f(535, 145)); // Top Right
 	innerNewsVec.push_back(Point2f(535, 332)); // Bottom Right
 	innerNewsVec.push_back(Point2f(274, 332)); // Bottom Left
+	*/
+
+	outerNewsVec.push_back(Point2f(0, 0)); // topLeft
+	outerNewsVec.push_back(Point2f(output.cols - 1, 0)); // topRight
+	outerNewsVec.push_back(Point2f(output.cols - 1, output.rows - 1)); // bottomRight
+	outerNewsVec.push_back(Point2f(0, output.rows - 1)); // bottomLeft
+
+	innerNewsVec.push_back(Point2f(240, 92)); // Top Left
+	innerNewsVec.push_back(Point2f(611, 92)); // Top Right
+	innerNewsVec.push_back(Point2f(611, 371)); // Bottom Right
+	innerNewsVec.push_back(Point2f(240, 371)); // Bottom Left
 
 	return getPerspectiveTransform(outerNewsVec, innerNewsVec);
 }
 
+Mat getCalibrationCorrection(Mat &output)
+{
+	vector<Point2f> calibrationVec, outerProjectionVec;
+
+	/*
+	calibrationVec.push_back(TL); // topLeft
+	calibrationVec.push_back(TR); // topRight
+	calibrationVec.push_back(BR); // bottomRight
+	calibrationVec.push_back(BL); // bottomLeft
+
+	outerProjectionVec.push_back(Point2f(36, 37)); // topLeft
+	outerProjectionVec.push_back(Point2f(602, 37)); // topRight
+	outerProjectionVec.push_back(Point2f(602, 442)); // bottomRight
+	outerProjectionVec.push_back(Point2f(36, 442)); // bottomLeft*/
+
+	calibrationVec.push_back(Point2f(36, 37)); // topLeft
+	calibrationVec.push_back(Point2f(602, 37)); // topRight
+	calibrationVec.push_back(Point2f(602, 442)); // bottomRight
+	calibrationVec.push_back(Point2f(36, 442)); // bottomLeft
+
+	outerProjectionVec.push_back(Point2f(0, 0)); // topLeft
+	outerProjectionVec.push_back(Point2f(output.cols - 1, 0)); // topRight
+	outerProjectionVec.push_back(Point2f(output.cols - 1, output.rows - 1)); // bottomRight
+	outerProjectionVec.push_back(Point2f(0, output.rows - 1)); // bottomLeft
+
+	return getPerspectiveTransform(calibrationVec, outerProjectionVec);
+}
+
 void transform(Mat &output)
 {
+	//imshow("Original Output", output);
+	cout << "Transforming...\n\n";
 	vector<Point2f> calibrationVec, newspaperVec, outerNewsVec, innerNewsVec;
-	Mat calibToNewsTrans, outerToInnerTrans, outerNews, innerNews;
+	Mat calibToNewsTrans, outerToInnerTrans, outerNews, innerNews, calibToOuterProjTrans, calibCorrected;
 
 	calibrationVec.push_back(TL); // topLeft
 	calibrationVec.push_back(TR); // topRight
@@ -580,20 +1014,27 @@ void transform(Mat &output)
 	calibrationVec.push_back(Point2f(output.cols - 1, output.rows - 1)); // bottomRight
 	calibrationVec.push_back(Point2f(0, output.rows - 1)); // bottomLeft
 	*/
-	// currently hardcoded
+	
+	/*
 	newspaperVec.push_back(Point2f(pink.x, pink.y)); //topLeft
 	newspaperVec.push_back(Point2f(blue.x, blue.y)); //topRight
 	newspaperVec.push_back(Point2f(green.x, green.y)); //bottomRight
 	newspaperVec.push_back(Point2f(gold.x, gold.y)); //bottomLeft
-
-	calibToNewsTrans = getPerspectiveTransform(calibrationVec, newspaperVec);
-	warpPerspective(output, outerNews, calibToNewsTrans, output.size());
-
-	outerToInnerTrans = getOuterToInner();
-	warpPerspective(outerNews, innerNews, outerToInnerTrans, output.size());
+	*/
 	
+	newspaperVec.push_back(topLeft); //topLeft
+	newspaperVec.push_back(topRight); //topRight
+	newspaperVec.push_back(bottomRight); //bottomRight
+	newspaperVec.push_back(bottomLeft); //bottomLeft
+
+
+	Mat warpMatrix = getPerspectiveTransform(calibrationVec, newspaperVec) * getOuterToInner(output);
+	Mat warped;
+	warpPerspective(output, warped, warpMatrix, output.size());
+
+
 	namedWindow("Output", WINDOW_NORMAL);
 	setWindowProperty("Output", WND_PROP_FULLSCREEN, WINDOW_FULLSCREEN);
-	//imshow("Output", outerNews);
-	imshow("Output", innerNews);
+	//imshow("Output", calibCorrected);
+	imshow("Output", warped);
 }
