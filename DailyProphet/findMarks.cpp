@@ -34,10 +34,14 @@ void populatedCalibPt()
 	TR = Point2f(360, 20);
 	BR = Point2f(360, 290);
 	BL = Point2f(20, 290);*/
-	TL = Point2f(36, 37);
+	/*TL = Point2f(36, 37);
 	TR = Point2f(602, 37);
 	BR = Point2f(602, 442);
-	BL = Point2f(36, 442);
+	BL = Point2f(36, 442); */
+	TL = Point2f(0, 0);
+	TR = Point2f(639, 0);
+	BR = Point2f(639, 479);
+	BL = Point2f(0, 479);
 }
 
 // ---------------- functions for locating markers -------------------------------
@@ -71,7 +75,7 @@ bool isContourInsideContour(CONT& in, CONT& out){
 	return true;
 }
 
-vector<CONT > findLimitedConturs(Mat contour, float minPix, float maxPix){
+vector<CONT > findLimitedConturs(Mat &input, Mat contour, float minPix, float maxPix){
 	//cout << "min: " << minPix << "\tmax: " << maxPix << endl;
 	vector<CONT > contours; //will be populated with all found contours by findContours each contour is a vector of points
 	vector<Vec4i> hierarchy; //output vector containing info about contour topology, e.g. the number of contours
@@ -80,6 +84,17 @@ vector<CONT > findLimitedConturs(Mat contour, float minPix, float maxPix){
 	//For example, an up-right rectangular contour is encoded with 4 points
 	findContours(contour, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE);
 	//cout << "contours.size = " << contours.size() << endl;
+
+	RNG rng;
+	/*
+	Mat contour1 = input.clone();
+	for (int i = 0; i < contours.size(); i++)
+	{
+		Scalar color = Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
+		drawContours(contour1, contours, i, color, 1, 8, hierarchy, 0, Point());
+	}
+	imshow("All Contours", contour1);
+	*/
 	int m = 0;
 	// for each contour eliminate too big and too small
 	while (m < contours.size()){
@@ -91,6 +106,16 @@ vector<CONT > findLimitedConturs(Mat contour, float minPix, float maxPix){
 		}
 		else ++m;
 	}
+	
+	/*
+	Mat contour2 = input.clone();
+	for (int i = 0; i < contours.size(); i++)
+	{
+		Scalar color = Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
+		drawContours(contour2, contours, i, color, 1, 8, hierarchy, 0, Point());
+	}
+	imshow("Refined Contours", contour2);
+	*/
 	//cout << "contours.size() = " << contours.size() << endl;
 	return contours;
 }
@@ -124,6 +149,7 @@ vector<vector<CONT > > getContourPair(vector<CONT > &contours){
 		sort(vecpair[i].begin(), vecpair[i].end(), compareContourAreas);
 	}
 	//cout << "vecpair.size(): " << vecpair.size() << endl;
+
 	return vecpair;
 }
 
@@ -155,6 +181,36 @@ void eliminatePairs(vector<vector<CONT > >& vecpair, double minRatio, double max
 }
 
 // --------- calibrate projection ------------------
+void extrapolateCalib()
+{
+	Point2f dirX, dirY, _topLeft = TL, _topRight = TR, _bottomRight = BR, _bottomLeft = BL;
+
+	//TL
+	dirX = TR - TL;
+	dirY = BL - TL;
+	_topLeft -= (0.04 * dirX) + (0.05 * dirY);
+
+	//TR
+	dirX = TL - TR;
+	dirY = BR - TR;
+	_topRight -= (0.04 * dirX) + (0.05 * dirY);
+
+	//BR
+	dirX = BL - BR;
+	dirY = TR - BR;
+	_bottomRight -= (0.04 * dirX) + (0.05 * dirY);
+
+	//BL
+	dirX = BR - BL;
+	dirY = TL - BL;
+	_bottomLeft -= (0.04 * dirX) + (0.05 * dirY);
+
+	TL = _topLeft;
+	TR = _topRight;
+	BR = _bottomRight;
+	BL = _bottomLeft;
+}
+
 void populateCalibrationPts(vector<Point2f> &center, Mat &input)
 {
 	vector<bool> isIdentified(center.size(), false);
@@ -220,32 +276,34 @@ void populateCalibrationPts(vector<Point2f> &center, Mat &input)
 	TR = _topRight;
 	BR = _bottomRight;
 	BL = _bottomLeft;
+
+	extrapolateCalib();
 	
 	Scalar color = Scalar(0, 255, 255);
 	Mat calibration = input.clone();
 
-	/*
+	
 	cout << "\nTop Left: " << TL << endl;
-	circle(calibration, TL, 20, color, 2, 8, 0);
+	circle(calibration, TL, 5, color, 2, 8, 0);
 	imshow("Calibration", calibration);
 	waitKey(0);
 
 	cout << "Bottom Right: " << BR << endl;
-	circle(calibration, BR, 20, color, 2, 8, 0);
+	circle(calibration, BR, 5, color, 2, 8, 0);
 	imshow("Calibration", calibration);
 	waitKey(0);
 
 	cout << "Top Right: " << TR << endl;
-	circle(calibration, TR, 20, color, 2, 8, 0);
+	circle(calibration, TR, 5, color, 2, 8, 0);
 	imshow("Calibration", calibration);
 	waitKey(0);
 
 	cout << "Bottom Left: " << BL << endl;
-	circle(calibration, BL, 20, color, 2, 8, 0);
+	circle(calibration, BL, 5, color, 2, 8, 0);
 	
 	imshow("Calibration", calibration);
 	waitKey(0);
-	*/
+	
 }
 
 void calibrateProjection(Mat &input)
@@ -259,7 +317,7 @@ void calibrateProjection(Mat &input)
 	//-------------- find patternss ----------------
 	vector<CONT > contours;
 	vector<Vec4i> hierarchy;
-	contours = findLimitedConturs(binary, 8.00, 0.2 * input.cols * input.rows);
+	contours = findLimitedConturs(input, binary, 8.00, 0.2 * input.cols * input.rows);
 	if (!contours.empty()) sort(contours.begin(), contours.end(), compareContourAreas);
 	vector<vector<CONT > > vecpair = getContourPair(contours);
 	eliminatePairs(vecpair, 1.0, 10.0);
@@ -350,7 +408,7 @@ float calibrateColours(Mat &input, int code)
 	//-------------- find patternss ----------------
 	vector<CONT > contours;
 	vector<Vec4i> hierarchy;
-	contours = findLimitedConturs(binary, 8.00, 0.2 * input.cols * input.rows);
+	contours = findLimitedConturs(input, binary, 8.00, 0.2 * input.cols * input.rows);
 	if (!contours.empty()) sort(contours.begin(), contours.end(), compareContourAreas);
 	vector<vector<CONT > > vecpair = getContourPair(contours);
 	eliminatePairs(vecpair, 1.0, 10.0);
@@ -374,7 +432,21 @@ float calibrateColours(Mat &input, int code)
 
 		Mat crop = channels[0](ROI);
 		Scalar meanHue = mean(crop);
+		Mat crop1 = input(ROI);
 	
+		/*rectangle(input, boundRect[0], Scalar(128, 128, 128), 1, 8, 0);
+		imshow("Bound Rect", input);
+		//imshow("crop", crop1);
+
+		 //for screenshot purposes
+		vector<vector<Point> > contours_poly2(vecpair.size());
+		vector<Rect> boundRect2(vecpair.size());
+		approxPolyDP(Mat(vecpair.at(0).at(0)), contours_poly2[0], 3, true);
+		boundRect2[0] = boundingRect(Mat(contours_poly2[0]));
+		Rect ROI2(boundRect2[0].tl(), boundRect2[0].br());
+		Mat crop2 = input(ROI2);
+		imshow("Crop", crop2);*/
+
 		return meanHue[0];
 	}
 }
@@ -405,12 +477,14 @@ void identifyMark(Scalar m, Point2f centre)
 	else if ((hue >= goldMin) && (hue <= goldMax))
 	{
 		gold = centre;
+		bottomLeft = centre;
 		identified[3] = true;
 		cout << "Gold: " << gold << endl;
 	}
 	else if ((hue >= greenMin) && (hue <= greenMax))
 	{
 		green = centre;
+		bottomRight = centre;
 		identified[2] = true;
 		cout << "Green: " << green << endl;
 	}
@@ -422,6 +496,7 @@ void identifyMark(Scalar m, Point2f centre)
 	else if ((hue >= blueMin) && (hue <= blueMax))
 	{
 		blue = centre;
+		topRight = centre;
 		identified[1] = true;
 		cout << "Blue: " << blue << endl;
 	}
@@ -433,6 +508,7 @@ void identifyMark(Scalar m, Point2f centre)
 	else if ((hue >= pinkMin) && (hue <= pinkMax))
 	{
 		pink = centre;
+		topLeft = centre;
 		identified[0] = true;
 		cout << "Pink: " << pink << endl;
 	}
@@ -472,7 +548,7 @@ void findColourMarks(Mat &input, Mat &output)
 	//-------------- find patternss ----------------
 	vector<CONT > contours;
 	vector<Vec4i> hierarchy;
-	contours = findLimitedConturs(binary, 8.00, 0.2 * input.cols * input.rows);
+	contours = findLimitedConturs(input, binary, 8.00, 0.2 * input.cols * input.rows);
 	if (!contours.empty()) sort(contours.begin(), contours.end(), compareContourAreas); // areas sorted from smallest to largest
 	vector<vector<CONT > > vecpair = getContourPair(contours);
 	eliminatePairs(vecpair, 1.0, 10.0);
@@ -540,6 +616,7 @@ void findColourMarks(Mat &input, Mat &output)
 		bool found = true;
 		for (int i = 0; i < NUM_MARKS; i++)
 		{
+			//cout << "identified " << identified[i] << endl;
 			if (!identified[i])
 				found = false;
 		}
@@ -547,7 +624,17 @@ void findColourMarks(Mat &input, Mat &output)
 		if (found)
 			transform(output);
 
-		//drawCircles(image);
+		Scalar colour = Scalar(0, 128, 255);
+		circle(input, topLeft, 5, colour, 2, 8, 0);
+		circle(input, topRight, 5, colour, 2, 8, 0);
+		circle(input, bottomRight, 5, colour, 2, 8, 0);
+		circle(input, bottomLeft, 5, colour, 2, 8, 0);
+
+		Scalar colour2 = Scalar(255, 128, 0);
+		circle(input, TL, 5, colour2, 2, 8, 0);
+		circle(input, TR, 5, colour2, 2, 8, 0);
+		circle(input, BR, 5, colour2, 2, 8, 0);
+		circle(input, BL, 5, colour2, 2, 8, 0);
 	}
 }
 
@@ -635,10 +722,11 @@ void findMarks(Mat &input, Mat &output)
 	//-------------- find patternss ----------------
 	vector<CONT > contours;
 	vector<Vec4i> hierarchy;
-	contours = findLimitedConturs(binary, 8.00, 0.2 * input.cols * input.rows);
+	contours = findLimitedConturs(input, binary, 8.00, 0.2 * input.cols * input.rows);
 
 	if (!contours.empty()) sort(contours.begin(), contours.end(), compareContourAreas); // areas sorted from smallest to largest
 	vector<vector<CONT > > vecpair = getContourPair(contours);
+
 	eliminatePairs(vecpair, 1.0, 10.0);
 
 	for (int i = 0; i < NUM_MARKS; i++)
@@ -671,13 +759,25 @@ void findMarks(Mat &input, Mat &output)
 			Rect ROI(boundRect[i].tl(), boundRect[i].br());
 			Mat crop = input(ROI);
 			Scalar color = mean(crop);
-
-			circle(input, center[i], 20, color, 2, 8, 0);
+			Scalar color3 = Scalar(0, 255, 255);
+			circle(input, center[i], 5, color3, 2, 8, 0);
 		}
 		cout << endl << endl;
 		imshow("Input", input);
 		if(populateMarks(center))
 			transform(output);
+
+		Scalar colour = Scalar(0, 128, 255);
+		circle(input, topLeft, 5, colour, 2, 8, 0);
+		circle(input, topRight, 5, colour, 2, 8, 0);
+		circle(input, bottomRight, 5, colour, 2, 8, 0);
+		circle(input, bottomLeft, 5, colour, 2, 8, 0);
+
+		Scalar colour2 = Scalar(255, 128, 0);
+		circle(input, TL, 5, colour2, 2, 8, 0);
+		circle(input, TR, 5, colour2, 2, 8, 0);
+		circle(input, BR, 5, colour2, 2, 8, 0);
+		circle(input, BL, 5, colour2, 2, 8, 0);
 	}
 }
 
@@ -853,7 +953,7 @@ void findAlignmentMarks(Mat &input, Mat &output)
 	//-------------- find patternss ----------------
 	vector<CONT > contours;
 	vector<Vec4i> hierarchy;
-	contours = findLimitedConturs(binary, 8.00, 0.2 * input.cols * input.rows);
+	contours = findLimitedConturs(input, binary, 8.00, 0.2 * input.cols * input.rows);
 	if (!contours.empty()) sort(contours.begin(), contours.end(), compareContourAreas); // areas sorted from smallest to largest
 	vector<vector<CONT > > vecpair = getContourPair(contours);
 	eliminatePairs(vecpair, 1.0, 10.0);
@@ -943,27 +1043,22 @@ Mat getOuterToInner(Mat &output)
 {
 	vector<Point2f> outerNewsVec, innerNewsVec;
 
-	/*
-	outerNewsVec.push_back(Point2f(52, 55)); // Top Left
-	outerNewsVec.push_back(Point2f(590, 55)); // Top Right
-	outerNewsVec.push_back(Point2f(590, 427)); // Bottom Right
-	outerNewsVec.push_back(Point2f(52, 427)); // Bottom Left
-
-	innerNewsVec.push_back(Point2f(274, 145)); // Top Left
-	innerNewsVec.push_back(Point2f(535, 145)); // Top Right
-	innerNewsVec.push_back(Point2f(535, 332)); // Bottom Right
-	innerNewsVec.push_back(Point2f(274, 332)); // Bottom Left
-	*/
-
 	outerNewsVec.push_back(Point2f(0, 0)); // topLeft
 	outerNewsVec.push_back(Point2f(output.cols - 1, 0)); // topRight
 	outerNewsVec.push_back(Point2f(output.cols - 1, output.rows - 1)); // bottomRight
 	outerNewsVec.push_back(Point2f(0, output.rows - 1)); // bottomLeft
 
+	/*
 	innerNewsVec.push_back(Point2f(240, 92)); // Top Left
 	innerNewsVec.push_back(Point2f(611, 92)); // Top Right
 	innerNewsVec.push_back(Point2f(611, 371)); // Bottom Right
 	innerNewsVec.push_back(Point2f(240, 371)); // Bottom Left
+	*/
+
+	innerNewsVec.push_back(Point2f(250, 102)); // Top Left
+	innerNewsVec.push_back(Point2f(601, 102)); // Top Right
+	innerNewsVec.push_back(Point2f(601, 361)); // Bottom Right
+	innerNewsVec.push_back(Point2f(250, 361)); // Bottom Left
 
 	return getPerspectiveTransform(outerNewsVec, innerNewsVec);
 }
@@ -996,17 +1091,56 @@ Mat getCalibrationCorrection(Mat &output)
 	return getPerspectiveTransform(calibrationVec, outerProjectionVec);
 }
 
+void interpolateInnerPts()
+{
+	Point2f dirX, dirY, _topLeft = topLeft, _topRight = topRight, _bottomRight = bottomRight, _bottomLeft = bottomLeft;
+
+	//topLeft
+	dirX = topRight - topLeft;
+	dirY = bottomLeft - topLeft;
+	_topLeft += (0.41 * dirX) + (0.23 * dirY);
+
+	//topRight
+	dirX = topLeft - topRight;
+	dirY = bottomRight - topRight;
+	_topRight += (0.08 * dirX) + (0.23 * dirY);
+
+	//bottomRight
+	dirX = bottomLeft - bottomRight;
+	dirY = topRight - bottomRight;
+	_bottomRight += (0.08 * dirX) + (0.27 * dirY);
+
+	//bottomLeft
+	dirX = bottomRight - bottomLeft;
+	dirY = topLeft - bottomLeft;
+	_bottomLeft += (0.41 * dirX) + (0.27 * dirY);
+
+	// re-populate points
+	topLeft = _topLeft;
+	topRight = _topRight;
+	bottomRight = _bottomRight;
+	bottomLeft = _bottomLeft;
+}
+
 void transform(Mat &output)
 {
 	//imshow("Original Output", output);
 	cout << "Transforming...\n\n";
-	vector<Point2f> calibrationVec, newspaperVec, outerNewsVec, innerNewsVec;
-	Mat calibToNewsTrans, outerToInnerTrans, outerNews, innerNews, calibToOuterProjTrans, calibCorrected;
+	vector<Point2f> calibrationVec, newspaperVec, outerNewsVec, innerNewsVec, vector1;
+	Mat calibToNewsTrans, outerToInnerTrans, outerNews, innerNews, calibToOuterProjTrans, calibCorrected, warpMatrix, warped, transform1, undoTransform1;
+
+	vector1.push_back(Point2f(0, 0)); // topLeft
+	vector1.push_back(Point2f(output.cols - 1, 0)); // topRight
+	vector1.push_back(Point2f(output.cols - 1, output.rows - 1)); // bottomRight
+	vector1.push_back(Point2f(0, output.rows - 1)); // bottomLeft
 
 	calibrationVec.push_back(TL); // topLeft
 	calibrationVec.push_back(TR); // topRight
 	calibrationVec.push_back(BR); // bottomRight
 	calibrationVec.push_back(BL); // bottomLeft
+
+	transform1 = getPerspectiveTransform(vector1, calibrationVec);
+	undoTransform1 = getPerspectiveTransform(calibrationVec, vector1);
 	
 	/*
 	calibrationVec.push_back(Point2f(0,0)); // topLeft
@@ -1022,16 +1156,22 @@ void transform(Mat &output)
 	newspaperVec.push_back(Point2f(gold.x, gold.y)); //bottomLeft
 	*/
 	
+	interpolateInnerPts();
+
 	newspaperVec.push_back(topLeft); //topLeft
 	newspaperVec.push_back(topRight); //topRight
 	newspaperVec.push_back(bottomRight); //bottomRight
 	newspaperVec.push_back(bottomLeft); //bottomLeft
 
+	//warpMatrix = getPerspectiveTransform(calibrationVec, newspaperVec) *  getOuterToInner(output);
+	warpMatrix = getPerspectiveTransform(calibrationVec, newspaperVec);
 
-	Mat warpMatrix = getPerspectiveTransform(calibrationVec, newspaperVec) * getOuterToInner(output);
-	Mat warped;
-	warpPerspective(output, warped, warpMatrix, output.size());
-
+	//warpMatrix = transform1 * warpMatrix * undoTransform1;
+	Mat a, b;
+	warpPerspective(output, a, transform1, output.size(), INTER_NEAREST, BORDER_CONSTANT, Scalar());
+	warpPerspective(a, b, warpMatrix, output.size(), INTER_NEAREST, BORDER_CONSTANT, Scalar());
+	warpPerspective(b, warped, undoTransform1, output.size(), INTER_NEAREST, BORDER_CONSTANT, Scalar());
+	//warpPerspective(output, warped, warpMatrix, output.size(), INTER_NEAREST, BORDER_CONSTANT, Scalar());
 
 	namedWindow("Output", WINDOW_NORMAL);
 	setWindowProperty("Output", WND_PROP_FULLSCREEN, WINDOW_FULLSCREEN);

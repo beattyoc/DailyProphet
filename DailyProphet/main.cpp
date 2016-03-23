@@ -6,7 +6,7 @@
 #include <iostream>
 #include <vector>
 
-#define NUM_MARKS 1
+#define NUM_MARKS 4
 
 using namespace cv;
 using namespace std;
@@ -22,7 +22,7 @@ int main(int argc, const char** argv)
 	Mat dotSample = imread("Media/dotSample.png");
 	Mat cameraPic = imread("Media/cameraPic.jpg");
 	Mat sciGal = imread("Media/ScienceGalleryNewsLight.png");
-	Mat calibrationImage = imread("Media/calibrationImage3.png");
+	Mat calibrationImage = imread("Media/calibrationImage.png");
 	Mat black = imread("Media/black.png");
 	Mat samples = imread("Media/samples_new.png");
 	
@@ -159,12 +159,11 @@ int main(int argc, const char** argv)
 			cout << "Calibrate projector and camera...\n";
 			calibrateProjection(input);
 
-			/*
 			cout << "\nWere the marks correct?: ";
 			cin >> answer;
 			if (answer != "y")
 				setUp = true;
-			*/
+
 			cameraCalibrated = true;
 		}
 
@@ -195,13 +194,13 @@ int main(int argc, const char** argv)
 			setWindowProperty("Black", WND_PROP_FULLSCREEN, WINDOW_FULLSCREEN);
 			imshow("Black", black);
 			
-			
-		/*	cout << "\nColour Codes:\n0 - Pink\n1 - Blue\n2 - Green\n3 - Gold\n\n";
-				//"4 - Purple\n5 - Teal\n6 - Green/Yellow\n7 - Red\n\n";
+			/*
 			for (int j = 0; j < NUM_MARKS; j++)
 			{
 				imshow("Input", input);
 				cout << "\nCalibrate " << j << endl;
+				cout << "\nColour Codes:\n0 - Pink\n1 - Blue\n2 - Green\n3 - Gold\n\n";
+				//"4 - Purple\n5 - Teal\n6 - Green/Yellow\n7 - Red\n\n";
 
 				waitKey(0);
 				capInput >> input;
@@ -210,16 +209,16 @@ int main(int argc, const char** argv)
 					capInput >> input;
 					imshow("Input", input);
 					float temp = calibrateColours(input, j);
-					cout << "temp " << temp << endl;
+					cout << "tmpHue: " << temp << endl;
 					if (temp > 0)
 						avgHue += temp;
 					else
 						total--;
 				}
 				avgHue = avgHue / total;
-				cout << "avgHue: " << avgHue << endl;
+				cout << "\navgHue: " << avgHue << endl;
 
-				populateColourPts(j, avgHue - 13, avgHue + 13);
+				populateColourPts(j, avgHue - 10, avgHue + 10);
 
 				total = iterations;
 				avgHue = 0;
@@ -239,18 +238,20 @@ int main(int argc, const char** argv)
 		{
 			//test(input, output);
 			findMarks(input, output);
+			//findColourMarks(input, output);
 			//findAlignmentMarks(input, output);
 			imshow("Input", input);
 		}
-		int k = waitKey(30);
+		
+		/*int k = waitKey(30);
 		if (k == 32)
 		{
 			namedWindow("Black", WINDOW_NORMAL);
 			setWindowProperty("Black", WND_PROP_FULLSCREEN, WINDOW_FULLSCREEN);
 			imshow("Black", black);
 		}
-		else if (k == 27) break;
-		//if (waitKey(30) >= 0) break;
+		else if (k == 27) break;*/
+		if (waitKey(30) >= 0) break;
 		count++;
 	}
 	
